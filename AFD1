@@ -1,0 +1,112 @@
+package com.mycompany.automatafd1;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+public class AFD1 {
+    private String estadoActual;
+    private final String estadoInicial = "q0";
+    private final List<String> estadosAceptacion = Arrays.asList(
+        "q0,q1,q2"  
+    );
+    private Map<String, Map<String, String>> transiciones;
+
+    public AFD1() {
+        estadoActual = estadoInicial;
+        transiciones = new HashMap<>();
+        inicializarTransiciones();
+    }
+
+    private void inicializarTransiciones() {
+        
+        agregarTransicion("q0", "0", "q0,q1");
+        agregarTransicion("q0", "1", "q0");
+        
+        
+        agregarTransicion("q0,q1", "0", "q0,q1,q2");
+        agregarTransicion("q0,q1", "1", "q0");
+        
+        
+        agregarTransicion("q0,q1,q2", "0", "q0,q1,q2");
+        agregarTransicion("q0,q1,q2", "1", "q0");
+    }
+
+    private void agregarTransicion(String estado, String simbolo, String nuevoEstado) {
+        transiciones.computeIfAbsent(estado, k -> new HashMap<>()).put(simbolo, nuevoEstado);
+    }
+
+    public boolean procesarCadena(String cadena) {
+        estadoActual = estadoInicial;
+        
+        for (int i = 0; i < cadena.length(); i++) {
+            String simbolo = String.valueOf(cadena.charAt(i));
+            
+            
+            if (!simbolo.equals("0") && !simbolo.equals("1")) {
+                return false;
+            }
+            
+            
+            Map<String, String> transicionesEstado = transiciones.get(estadoActual);
+            if (transicionesEstado == null) {
+                return false;  
+            }
+            
+           
+            String nuevoEstado = transicionesEstado.get(simbolo);
+            if (nuevoEstado == null) {
+                return false;  
+            }
+            
+            estadoActual = nuevoEstado;
+        }
+        
+        
+        return estadosAceptacion.contains(estadoActual);
+    }
+
+    public void validarCadenas(List<String> cadenasW) {
+        System.out.println("\n=== RESULTADOS DE VALIDACION ===");
+        cadenasW.forEach(cadena -> {
+            if (procesarCadena(cadena)) {
+                System.out.println(cadena + " VALIDA");
+            } else {
+                System.out.println(cadena + " NO VALIDA");
+            }
+        });
+        System.out.println("==============================");
+    }
+
+    public static void main(String[] args) {
+        AFD1 automata = new AFD1();
+        
+    
+        List<String> cadenas = Arrays.asList(
+            "00",    
+            "100",   
+            "010",   
+            "000",   
+            "001",  
+            "110"  
+        );
+      
+        automata.validarCadenas(cadenas);
+        
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\n¿Desea probar cadenas adicionales? (s/n)");
+        String respuesta = scanner.nextLine().trim().toLowerCase();
+        
+        if (respuesta.equals("s")) {
+            System.out.println("Ingrese las cadenas separadas por comas:");
+            String input = scanner.nextLine();
+            List<String> cadenasUsuario = Arrays.asList(input.split("\\s*,\\s*"));
+            automata.validarCadenas(cadenasUsuario);
+        }
+        
+        scanner.close();
+    }
+}
