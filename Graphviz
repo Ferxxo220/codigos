@@ -1,0 +1,31 @@
+digraph MinimizedAFD {
+    rankdir=LR;
+    node [shape=circle];
+    
+    // Estados
+    A_prime [label="A'"];
+    B_prime [label="B'"]; 
+    C [label="C", shape=doublecircle]; 
+    F [label="F"]; 
+    G [label="G"]; 
+
+    // Estado inicial
+    inicio [shape=point];
+    inicio -> A_prime;
+
+    // Transiciones
+    A_prime -> B_prime [label="0"];
+    A_prime -> F [label="1"];
+
+    B_prime -> G [label="0"];
+    B_prime -> C [label="1"];
+
+    C -> A_prime [label="0"];
+    C -> C [label="1"];
+
+    F -> C [label="0"];
+    F -> G [label="1"];
+
+    G -> G [label="0"];
+    G -> A_prime [label="1"];
+}
