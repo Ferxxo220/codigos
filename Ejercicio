@@ -1,0 +1,106 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class AutomataFD2 {
+    private String estadoActual;
+    private final String estadoInicial = "E2";
+    private final String estadosAceptacion = "E1"; 
+
+    private final Map<String, Map<String, String>> transiciones;
+
+    public AutomataFD2() {
+        estadoActual = estadoInicial;
+        transiciones = new HashMap<>();
+
+        
+        Map<String, String> tranqE1 = new HashMap<>();
+        tranqE1.put("0", "E2");
+        tranqE1.put("1", "E1");
+        transiciones.put("E1", tranqE1);
+        
+        
+        Map<String, String> tranqE2 = new HashMap<>();
+        tranqE2.put("0", "E3");
+        tranqE2.put("1", "E7");
+        transiciones.put("E2", tranqE2);
+        
+        
+        Map<String, String> tranqE3 = new HashMap<>();
+        tranqE3.put("0", "E4");  
+        tranqE3.put("1", "E7");
+        transiciones.put("E3", tranqE3);
+        
+        
+        Map<String, String> tranqE4 = new HashMap<>();
+        tranqE4.put("0", "E4");
+        tranqE4.put("1", "E5");
+        transiciones.put("E4", tranqE4);
+        
+        
+        Map<String, String> tranqE5 = new HashMap<>();
+        tranqE5.put("0", "E7");
+        tranqE5.put("1", "E6");
+        transiciones.put("E5", tranqE5);
+        
+        
+        Map<String, String> tranqE6 = new HashMap<>();
+        tranqE6.put("0", "E4");
+        tranqE6.put("1", "E1");
+        transiciones.put("E6", tranqE6);
+        
+        
+        Map<String, String> tranqE7 = new HashMap<>();
+        tranqE7.put("0", "E1");
+        tranqE7.put("1", "E4");
+        transiciones.put("E7", tranqE7);
+    }
+
+    public boolean procesarAutomata(String cadena) {
+        estadoActual = estadoInicial;
+        
+        for (int i = 0; i < cadena.length(); i++) {
+            char c = cadena.charAt(i);
+            String simbolo = String.valueOf(c);
+            
+            if (!transiciones.containsKey(estadoActual)) {
+                System.out.println("Estado no valido: " + estadoActual);
+                return false;
+            }
+            
+            Map<String, String> transicionesEstado = transiciones.get(estadoActual);
+            
+            if (!transicionesEstado.containsKey(simbolo)) {
+                System.out.println("Simbolo no valido: '" + simbolo + "'");
+                return false;
+            }
+            
+            estadoActual = transicionesEstado.get(simbolo);
+            
+        }
+        
+        return estadoActual.equals(estadosAceptacion);
+    }
+    
+    public static void main(String[] args) {
+        AutomataFD2 automata = new AutomataFD2();
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Introduce una cadena : ");
+        String cadena = scanner.nextLine();
+
+        // Validate input contains only 0s and 1s
+        if (!cadena.matches("[01]+")) {
+            System.out.println("Cadena invalida");
+            scanner.close();
+            return;
+        }
+
+        if (automata.procesarAutomata(cadena)) {
+            System.out.println("Cadena aceptada");
+        } else {
+            System.out.println("Cadena rechazada");
+        }
+        scanner.close();
+    }
+}
