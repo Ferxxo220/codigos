@@ -1,0 +1,112 @@
+package com.example.mysatoro
+
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import android.content.Context
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+
+
+@Composable
+fun TestScreen(navController: NavController) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("ansiedad_test", Context.MODE_PRIVATE) }
+    val done = remember { mutableStateOf(prefs.getBoolean("test_done", false)) }
+
+    if (done.value) {
+        navController.popBackStack()
+        return
+    }
+
+    val questions = listOf(
+        "¿Te has sentido preocupado/a o nervioso/a la mayoría de los días, incluso por situaciones cotidianas?",
+        "¿Has experimentado latidos acelerados del corazón, palpitaciones o sensación de ahogo sin causa física aparente (como hacer ejercicio)?",
+        "¿Has tenido dificultad para conciliar el sueño, mantenerlo o has despertado muy temprano sin poder volver a dormir?",
+        "¿Has evitado reuniones sociales, hablar con personas o salir de casa debido al miedo o malestar que te generan estas situaciones?",
+        "¿Has tenido dolores musculares, tensión en la mandíbula o sensación de rigidez en el cuerpo sin haber hecho esfuerzo físico?"
+    )
+
+    val answers = remember { mutableStateListOf<Boolean?>().apply {
+        repeat(questions.size) { add(null) }
+    } }
+    val showResult = remember { mutableStateOf(false) }
+    val resultMessage = remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        if (showResult.value) {
+            Text(
+                text = resultMessage.value,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        } else {
+            questions.forEachIndexed { index, question ->
+                Text(
+                    text = question,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                Row(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Button(
+                        onClick = {
+                            answers[index] = true
+                        },
+                        modifier = Modifier.weight(1f).padding(end = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (answers[index] == true) Color(0xFF4CAF50) else Color(0xFFD3D3D3)
+                        )
+                    ) {
+                        Text("Sí")
+                    }
+
+                    Button(
+                        onClick = {
+                            answers[index] = false
+                        },
+                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (answers[index] == false) Color(0xFFF00C2FA) else Color(0xFFD3D3D3)
+                        )
+                    ) {
+                        Text("No")
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                    val yesCount = answers.count { it == true }
+                    resultMessage.value = if (yesCount >= 3) {
+                        "Resultado: Ansiedad alta. Se recomienda escuchar los audios de relajación disponibles en la app."
+                    } else {
+                        "Resultado: Ansiedad leve. Te sugerimos mantener hábitos saludables y usar los recursos preventivos de la app."
+                    }
+                    showResult.value = true
+                    prefs.edit().putBoolean("test_done", true).apply()
+                },
+                enabled = answers.all { it != null },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            ) {
+                Text("Enviar respuestas")
+            }
+        }
+    }
+}
